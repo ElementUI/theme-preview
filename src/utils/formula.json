@@ -1,0 +1,18 @@
+{
+  "secondary": "color(primary s(99%) l(*0.9))",
+
+  "darkWhite": "color(#fff blend(primary 2%))",
+
+  "baseBlack": "color(primary h(+6) s(33%) l(18%))",
+  "lightBlack": "color(baseBlack h(+5) s(27%) l(27%))",
+  "extraLightBlack": "color(baseBlack h(+2) s(19%) l(35%))",
+  "baseSilver": "color(baseBlack h(+3) s(16%) l(58%))",
+  "lightSilver": "color(baseBlack h(+3) s(23%) l(67%))",
+  "extraLightSilver": "color(baseBlack s(26%) l(80%))",
+  "baseGray": "color(baseBlack s(28%) l(86%))",
+  "lightGray": "color(baseBlack h(+10) s(33%) l(92%))",
+  "extraLightGray": "color(baseBlack h(+6) s(33%) l(95%))",
+
+  "buttonActive": "color(primary shade(10%))",
+  "buttonHover": "color(primary tint(20%))"
+}

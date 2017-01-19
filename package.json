@@ -1,0 +1,29 @@
+{
+  "name": "theme-preview",
+  "version": "0.0.0",
+  "description": "Preview theme transform in real-time",
+  "private": false,
+  "keywords": [],
+  "scripts": {
+    "dev": "cooking watch -p",
+    "dist": "cooking build -p",
+    "deploy": "cooking build -p"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ElementUI/theme-preview.git"
+  },
+  "author": "leopoldthecuber@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "babel-polyfill": "*",
+    "css-color-function": "^1.3.0",
+    "element-ui": "^1.1.5",
+    "vue": "^2.0.1",
+    "vue-router": "^2.1.1"
+  },
+  "devDependencies": {
+    "cooking-vue2": "*",
+    "gh-pages": "^0.12.0"
+  }
+}
