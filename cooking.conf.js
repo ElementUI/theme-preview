@@ -23,7 +23,7 @@ cooking.set({
   postcss: [
     require('postcss-salad')(saladConfig)
   ],
-  publicPath: '/docs/',
+  publicPath: './',
   assetsPath: 'static',
   urlLoaderLimit: 10000,
   static: true,
