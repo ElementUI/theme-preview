@@ -1,13 +1,19 @@
 <template>
   <div class="wrapper">
     <header
-      :style="{ 'background-color': `#${ primaryColor }` }">
+      :style="{ 'background-color': primaryColor }">
       <img
         src="./assets/element-logo.svg"
         alt="element-logo"
         class="header-logo">
       <ul class="header-operations">
         <li @click="showThemeDialog">切换主题色</li>
+        <li>
+          <a
+            :class="{ 'is-available': downloadUrl }"
+            :href="downloadUrl"
+            :download="downloadName">下载主题</a>
+        </li>
         <li>帮助</li>
         <li>
           <span
@@ -35,6 +41,7 @@
         </el-menu>
       </el-col>
       <el-col :span="20" class="content">
+        
         <router-view></router-view>
       </el-col>
     </el-row>
@@ -46,7 +53,7 @@
         label-position="left"
         label-width="70px">
         <el-form-item label="主题色" prop="primary">
-          <el-input v-model="colors.primary" class="color-input"></el-input>
+          <el-input type="color" v-model="colors.primary" class="color-input"></el-input>
         </el-form-item>
         <el-form-item class="color-buttons">
           <el-button type="primary" @click="submitForm">切换</el-button>
@@ -109,7 +116,7 @@
   .header-operations {
     display: inline-block;
     float: right;
-    padding-right: 100px;
+    padding-right: 30px;
     height: 100%;
     @utils-vertical-center;
     li {
@@ -120,8 +127,21 @@
       margin: 0 10px;
       line-height: 80px;
       cursor: pointer;
-      &:last-child {
+      &:last-child,
+      &:nth-child(2) {
         cursor: default;
+      }
+    }
+    a {
+      color: #fff;
+      opacity: 0.4;
+      pointer-events: none;
+      display: inline-block;
+      line-height: 80px;
+      @when available {
+        opacity: 1;
+        cursor: pointer;
+        pointer-events: auto;
       }
     }
     span {
@@ -135,16 +155,6 @@
     }
   }
   
-  .color-input::before {
-    content: "#";
-    position: absolute;
-    left: 5px;
-  }
-  
-  .color-input input {
-    padding-left: 15px;
-  }
-  
   .color-buttons {
     float: right;
   }
@@ -152,10 +162,9 @@
 
 <script>
   import generateColors from './utils/color';
-  import menu from './element-styles/menu';
-  import button from './element-styles/button';
-  import dialog from './element-styles/dialog';
-  import input from './element-styles/input';
+  import objectAssign from 'object-assign';
+  import blobUtil from 'blob-util';
+  import style from './style';
 
   export default {
     name: 'app',
@@ -164,7 +173,7 @@
       const colorValidator = (rule, value, callback) => {
         if (!value) {
           return callback(new Error('主题色不能为空'));
-        } else if (!/^[\dabcdef]{6}$/i.test(value)) {
+        } else if (!/^#[\dabcdef]{6}$/i.test(value)) {
           return callback(new Error('请输入 hex 格式的主题色'));
         } else {
           callback();
@@ -172,15 +181,17 @@
       };
       return {
         colors: {
-          primary: '20a0ff'
+          primary: '#20a0ff'
         },
         rules: {
           primary: [
             { validator: colorValidator, trigger: 'blur' }
           ]
         },
-        primaryColor: '20a0ff',
-        themeDialogVisible: false
+        primaryColor: '#20a0ff',
+        themeDialogVisible: false,
+        downloadUrl: '',
+        downloadName: ''
       };
     },
 
@@ -204,21 +215,20 @@
           if (valid) {
             this.themeDialogVisible = false;
             this.primaryColor = this.colors.primary;
-            this.colors.primary = `#${ this.colors.primary }`;
-            this.colors = Object.assign({}, this.colors, generateColors(this.colors.primary));
+            this.colors = objectAssign({}, this.colors, generateColors(this.colors.primary));
 
-            let newCSS = '';
-            newCSS += menu + button + dialog + input;
+            let newCSS = style;
             Object.keys(this.colors).forEach(key => {
-              console.log(key, this.colors[key]);
-              newCSS = newCSS.replace(new RegExp(' ' + key, 'g'), ' ' + this.colors[key]);
+              newCSS = newCSS.replace(new RegExp(':' + key, 'g'), ':' + this.colors[key]);
             });
 
-            const style = document.createElement('style');
-            style.innerText = newCSS;
-            document.head.appendChild(style);
-  
-            this.colors.primary = this.colors.primary.replace(/#/, '');
+            const newStyle = document.createElement('style');
+            newStyle.innerText = newCSS;
+            document.head.appendChild(newStyle);
+
+            const myCSS = blobUtil.createBlob([newCSS], { type: 'text/css' });
+            this.downloadUrl = URL.createObjectURL(myCSS);
+            this.downloadName = `element-${ this.primaryColor }.css`;
           } else {
             return false;
           }

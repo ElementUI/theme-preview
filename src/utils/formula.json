@@ -14,5 +14,15 @@
   "extraLightGray": "color(baseBlack h(+6) s(33%) l(95%))",
 
   "buttonActive": "color(primary shade(10%))",
-  "buttonHover": "color(primary tint(20%))"
+  "buttonHover": "color(primary tint(20%))",
+
+  "tableBorder": "color(extraLightSilver h(-3) s(27%) l(90%))",
+
+  "datepickerInRange": "color(primary tint(80%))",
+  "datepickerInRangeHover": "color(primary tint(64%))",
+
+  "selectOptionSelected": "color(primary shade(12%))",
+
+  "lightBackground": "color(primary tint(92%))",
+  "emptyText": "color(primary s(16%) l(44%))"
 }
