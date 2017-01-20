@@ -191,7 +191,7 @@
 
             let newCSS = style;
             Object.keys(this.colors).forEach(key => {
-              newCSS = newCSS.replace(new RegExp(':' + key, 'g'), ':' + this.colors[key]);
+              newCSS = newCSS.replace(new RegExp('(:|\\s+)' + key, 'g'), '$1' + this.colors[key]);
             });
 
             const newStyle = document.createElement('style');
