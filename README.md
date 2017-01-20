@@ -1,2 +1,9 @@
 # theme-preview
-Preview theme transform in real-time. Working in progress.
+Preview theme transform in real-time.
+
+Visit <a href="https://elementui.github.io/theme-preview/">this page</a>.
+
+- Click the 'Change Theme Color' button on the header menu, choose a theme color in the popped dialog, and click 'Change'
+- Now this page will apply a new style generated with your newly appointed theme color, so you can preview what Element looks like once this color is applied
+- Click the 'Download Theme' button on the header menu, and you can download the style file with the new theme color (currently only the index.css can be downloaded, and we have plans to enable downloading the complete style folder with all components' style files)
+- If you need more customization than just changing the theme color, please use <a href="https://github.com/ElementUI/element-theme" target="_blank">element-theme</a>

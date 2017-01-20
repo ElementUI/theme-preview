@@ -11,13 +11,11 @@ const routes = [
   },
   {
     path: '/zh-CN',
-    name: 'cn',
-    component: require('../pages/zh-CN.vue')
+    name: 'cn'
   },
   {
     path: '/en-US',
-    name: 'en',
-    component: require('../pages/zh-CN.vue')
+    name: 'en'
   },
   { path: '*', redirect: '/' }
 ];

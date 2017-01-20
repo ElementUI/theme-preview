@@ -1,2 +1,3 @@
 @import "./element-override.css";
+@import "./style.css";
 @reset-global pc;
