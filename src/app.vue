@@ -109,7 +109,6 @@
   import generateColors from './utils/color';
   import objectAssign from 'object-assign';
   import blobUtil from 'blob-util';
-  import style from './style';
   import langConfig from './lang';
   import tableData from './table-data';
   import Vue from 'vue';
@@ -136,6 +135,7 @@
             { validator: colorValidator, trigger: 'blur' }
           ]
         },
+        styleContent: '',
         langConfig,
         tableData,
         primaryColor: '#20a0ff',
@@ -189,16 +189,16 @@
             this.primaryColor = this.colors.primary;
             this.colors = objectAssign({}, this.colors, generateColors(this.colors.primary));
 
-            let newCSS = style;
+//            let newCSS = style;
             Object.keys(this.colors).forEach(key => {
-              newCSS = newCSS.replace(new RegExp('(:|\\s+)' + key, 'g'), '$1' + this.colors[key]);
+              this.styleContent = this.styleContent.replace(new RegExp('(:|\\s+)' + key, 'g'), '$1' + this.colors[key]);
             });
 
             const newStyle = document.createElement('style');
-            newStyle.innerText = newCSS;
+            newStyle.innerText = this.styleContent;
             document.head.appendChild(newStyle);
 
-            const myCSS = blobUtil.createBlob([newCSS], { type: 'text/css' });
+            const myCSS = blobUtil.createBlob([this.styleContent], { type: 'text/css' });
             this.downloadUrl = URL.createObjectURL(myCSS);
             this.downloadName = `element-${ this.primaryColor }.css`;
           } else {
@@ -210,6 +210,43 @@
       resetForm() {
         this.$refs.form.resetFields();
       }
+    },
+
+    created() {
+      const colorMap = {
+        '#20a0ff': 'primary',
+        '#0190fe': 'secondary',
+        '#fbfdff': 'darkWhite',
+        '#1f2d3d': 'baseBlack',
+        '#324157': 'lightBlack',
+        '#48576a': 'extraLightBlack',
+        '#8391a5': 'baseSilver',
+        '#97a8be': 'lightSilver',
+        '#bfcbd9': 'extraLightSilver',
+        '#d1dbe5': 'baseGray',
+        '#e4e8f1': 'lightGray',
+        '#eef1f6': 'extraLightGray',
+        '#1d90e6': 'buttonActive',
+        '#4db3ff': 'buttonHover',
+        '#dfe6ec': 'tableBorder',
+        '#d2ecff': 'datepickerInRange',
+        '#afddff': 'datepickerInRangeHover',
+        '#1c8de0': 'selectOptionSelected',
+        '#edf7ff': 'lightBackground'
+      };
+      const xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = _ => {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          let css = xhr.responseText;
+          Object.keys(colorMap).forEach(key => {
+            const value = colorMap[key];
+            css = css.replace(new RegExp(key, 'ig'), value);
+          });
+          this.styleContent = css;
+        }
+      };
+      xhr.open('GET', '//unpkg.com/element-ui/lib/theme-default/index.css');
+      xhr.send();
     }
   };
 </script>
