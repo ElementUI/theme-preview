@@ -1,5 +1,4 @@
 import color from 'css-color-function';
-import process from 'color';
 import formula from './formula.json';
 
 const generateColors = primary => {
@@ -24,7 +23,6 @@ const generateColors = primary => {
     if (key === 'extraLightSilver') {
       extraLightSilver = colors[key];
     }
-    console.log(key, process(colors[key]).hex().toLowerCase());
   });
   return colors;
 };
