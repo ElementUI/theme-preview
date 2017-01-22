@@ -61,21 +61,16 @@ header {
     margin: 0 10px;
     line-height: 80px;
     cursor: pointer;
-    &:last-child,
-    &:nth-child(2) {
+    &:last-child {
       cursor: default;
     }
   }
-  a {
-    color: #fff;
+  .header-download {
     opacity: 0.4;
-    pointer-events: none;
-    display: inline-block;
-    line-height: 80px;
+    cursor: default;
     @when available {
       opacity: 1;
       cursor: pointer;
-      pointer-events: auto;
     }
   }
   span {

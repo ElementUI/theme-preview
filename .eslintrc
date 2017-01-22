@@ -1,4 +1,7 @@
 {
   "plugins": ["vue"],
-  "extends": ["elemefe"]
+  "extends": ["elemefe"],
+  "globals": {
+    "Promise": true
+  }
 }

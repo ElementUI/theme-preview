@@ -8,11 +8,11 @@
         class="header-logo">
       <ul class="header-operations">
         <li @click="showThemeDialog">{{ langConfig.header.switch[lang] }}</li>
-        <li>
-          <a
-            :class="{ 'is-available': downloadUrl }"
-            :href="downloadUrl"
-            :download="downloadName">{{ langConfig.header.download[lang] }}</a>
+        <li
+          class="header-download"
+          :class="{ 'is-available': canDownload }"
+          @click="downloadZip">
+          {{ langConfig.header.download[lang] }}
         </li>
         <li @click="showHelpDialog">{{ langConfig.header.help[lang] }}</li>
         <li>
@@ -112,6 +112,8 @@
   import langConfig from './lang';
   import tableData from './table-data';
   import Vue from 'vue';
+  import JSZip from 'jszip';
+  import FileSaver from 'file-saver';
 
   export default {
     name: 'app',
@@ -135,14 +137,17 @@
             { validator: colorValidator, trigger: 'blur' }
           ]
         },
-        styleContent: '',
+        originalStyle: '',
         langConfig,
         tableData,
         primaryColor: '#20a0ff',
         themeDialogVisible: false,
         helpDialogVisible: false,
-        downloadUrl: '',
-        downloadName: '',
+        zip: null,
+        styleFiles: [],
+        fontFiles: ['element-icons.eot', 'element-icons.svg', 'element-icons.ttf', 'element-icons.woff'],
+        fonts: [],
+        canDownload: false,
         query: {
           name: '',
           date: []
@@ -182,6 +187,24 @@
         this.helpDialogVisible = true;
       },
 
+      resetZip() {
+        this.zip = new JSZip();
+        this.fonts.forEach((font, index) => {
+          this.zip.file(`fonts/${ this.fontFiles[index] }`, font.data);
+        });
+      },
+
+      writeNewStyle() {
+        let cssText = this.originalStyle;
+        Object.keys(this.colors).forEach(key => {
+          cssText = cssText.replace(new RegExp('(:|\\s+)' + key, 'g'), '$1' + this.colors[key]);
+        });
+
+        const style = document.createElement('style');
+        style.innerText = cssText;
+        document.head.appendChild(style);
+      },
+
       submitForm() {
         this.$refs.form.validate(valid => {
           if (valid) {
@@ -189,64 +212,128 @@
             this.primaryColor = this.colors.primary;
             this.colors = objectAssign({}, this.colors, generateColors(this.colors.primary));
 
-//            let newCSS = style;
-            Object.keys(this.colors).forEach(key => {
-              this.styleContent = this.styleContent.replace(new RegExp('(:|\\s+)' + key, 'g'), '$1' + this.colors[key]);
-            });
-
-            const newStyle = document.createElement('style');
-            newStyle.innerText = this.styleContent;
-            document.head.appendChild(newStyle);
-
-            const myCSS = blobUtil.createBlob([this.styleContent], { type: 'text/css' });
-            this.downloadUrl = URL.createObjectURL(myCSS);
-            this.downloadName = `element-${ this.primaryColor }.css`;
+            this.canDownload = true;
+            this.writeNewStyle();
           } else {
             return false;
           }
         });
       },
 
+      downloadZip() {
+        if (!this.canDownload) return;
+        this.resetZip();
+        this.styleFiles.forEach(file => {
+          let cssText = file.data;
+          Object.keys(this.colors).forEach(key => {
+            cssText = cssText.replace(new RegExp('(:|\\s+)' + key, 'g'), '$1' + this.colors[key]);
+          });
+          const css = blobUtil.createBlob([cssText], { type: 'text/css' });
+          this.zip.file(file.name, css);
+        });
+        this.zip.generateAsync({ type: 'blob' })
+          .then(blob => {
+            FileSaver.saveAs(blob, `element-${ this.primaryColor }.zip`);
+          });
+      },
+
       resetForm() {
         this.$refs.form.resetFields();
+      },
+
+      getStyleTemplate(data) {
+        const colorMap = {
+          '#20a0ff': 'primary',
+          '#0190fe': 'secondary',
+          '#fbfdff': 'darkWhite',
+          '#1f2d3d': 'baseBlack',
+          '#324157': 'lightBlack',
+          '#48576a': 'extraLightBlack',
+          '#8391a5': 'baseSilver',
+          '#97a8be': 'lightSilver',
+          '#bfcbd9': 'extraLightSilver',
+          '#d1dbe5': 'baseGray',
+          '#e4e8f1': 'lightGray',
+          '#eef1f6': 'extraLightGray',
+          '#1d90e6': 'buttonActive',
+          '#4db3ff': 'buttonHover',
+          '#dfe6ec': 'tableBorder',
+          '#d2ecff': 'datepickerInRange',
+          '#afddff': 'datepickerInRangeHover',
+          '#1c8de0': 'selectOptionSelected',
+          '#edf7ff': 'lightBackground'
+        };
+        Object.keys(colorMap).forEach(key => {
+          const value = colorMap[key];
+          data = data.replace(new RegExp(key, 'ig'), value);
+        });
+        return data;
+      },
+
+      getFile(url, isBlob = false) {
+        return new Promise((resolve, reject) => {
+          const client = new XMLHttpRequest();
+          client.responseType = isBlob ? 'blob' : '';
+          client.onreadystatechange = () => {
+            if (client.readyState !== 4) {
+              return;
+            }
+            if (client.status === 200) {
+              const urlArr = client.responseURL.split('/');
+              resolve({
+                data: client.response,
+                url: urlArr[urlArr.length - 1]
+              });
+            } else {
+              reject(new Error(client.statusText));
+            }
+          };
+          client.open('GET', url);
+          client.send();
+        });
+      },
+
+      getIndexStyle() {
+        this.getFile('//unpkg.com/element-ui/lib/theme-default/index.css')
+          .then(({ data }) => {
+            this.originalStyle = this.getStyleTemplate(data);
+          });
+      },
+
+      getSeparatedStyles() {
+        this.getFile('//unpkg.com/element-ui/lib/theme-default')
+          .then(({ data }) => {
+            return data.match(/href="[\w-]+\.css"/g).map(str => str.split('"')[1]);
+          })
+          .then(styleFiles => {
+            return Promise.all(styleFiles.map(file => {
+              return this.getFile(`//unpkg.com/element-ui/lib/theme-default/${ file }`);
+            }));
+          })
+          .then(files => {
+            this.styleFiles = files.map(file => {
+              return {
+                name: file.url,
+                data: this.getStyleTemplate(file.data)
+              };
+            });
+          });
+      },
+
+      getFontFiles() {
+        Promise.all(this.fontFiles.map(font => {
+          return this.getFile(`//unpkg.com/element-ui/lib/theme-default/fonts/${ font }`, true);
+        }))
+          .then(fonts => {
+            this.fonts = fonts;
+          });
       }
     },
 
     created() {
-      const colorMap = {
-        '#20a0ff': 'primary',
-        '#0190fe': 'secondary',
-        '#fbfdff': 'darkWhite',
-        '#1f2d3d': 'baseBlack',
-        '#324157': 'lightBlack',
-        '#48576a': 'extraLightBlack',
-        '#8391a5': 'baseSilver',
-        '#97a8be': 'lightSilver',
-        '#bfcbd9': 'extraLightSilver',
-        '#d1dbe5': 'baseGray',
-        '#e4e8f1': 'lightGray',
-        '#eef1f6': 'extraLightGray',
-        '#1d90e6': 'buttonActive',
-        '#4db3ff': 'buttonHover',
-        '#dfe6ec': 'tableBorder',
-        '#d2ecff': 'datepickerInRange',
-        '#afddff': 'datepickerInRangeHover',
-        '#1c8de0': 'selectOptionSelected',
-        '#edf7ff': 'lightBackground'
-      };
-      const xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = _ => {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          let css = xhr.responseText;
-          Object.keys(colorMap).forEach(key => {
-            const value = colorMap[key];
-            css = css.replace(new RegExp(key, 'ig'), value);
-          });
-          this.styleContent = css;
-        }
-      };
-      xhr.open('GET', '//unpkg.com/element-ui/lib/theme-default/index.css');
-      xhr.send();
+      this.getIndexStyle();
+      this.getSeparatedStyles();
+      this.getFontFiles();
     }
   };
 </script>
