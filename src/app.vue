@@ -137,6 +137,7 @@
             { validator: colorValidator, trigger: 'blur' }
           ]
         },
+        originalStylesheetCount: -1,
         originalStyle: '',
         langConfig,
         tableData,
@@ -200,9 +201,13 @@
           cssText = cssText.replace(new RegExp('(:|\\s+)' + key, 'g'), '$1' + this.colors[key]);
         });
 
-        const style = document.createElement('style');
-        style.innerText = cssText;
-        document.head.appendChild(style);
+        if (this.originalStylesheetCount === document.styleSheets.length) {
+          const style = document.createElement('style');
+          style.innerText = cssText;
+          document.head.appendChild(style);
+        } else {
+          document.head.lastChild.innerText = cssText;
+        }
       },
 
       submitForm() {
@@ -334,6 +339,12 @@
       this.getIndexStyle();
       this.getSeparatedStyles();
       this.getFontFiles();
+    },
+
+    mounted() {
+      this.$nextTick(_ => {
+        this.originalStylesheetCount = document.styleSheets.length;
+      });
     }
   };
 </script>
