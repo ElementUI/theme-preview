@@ -146,7 +146,7 @@
         helpDialogVisible: false,
         zip: null,
         styleFiles: [],
-        fontFiles: ['element-icons.eot', 'element-icons.svg', 'element-icons.ttf', 'element-icons.woff'],
+        fontFiles: ['element-icons.ttf', 'element-icons.woff'],
         fonts: [],
         canDownload: false,
         query: {
@@ -191,6 +191,7 @@
       resetZip() {
         this.zip = new JSZip();
         this.fonts.forEach((font, index) => {
+          console.log(font, index);
           this.zip.file(`fonts/${ this.fontFiles[index] }`, font.data);
         });
       },
