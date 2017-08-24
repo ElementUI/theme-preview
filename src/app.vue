@@ -307,7 +307,7 @@
       },
 
       getSeparatedStyles() {
-        this.getFile('//unpkg.com/element-ui/lib/theme-default')
+        this.getFile('//unpkg.com/element-ui/lib/theme-default/')
           .then(({ data }) => {
             return data.match(/href="[\w-]+\.css"/g).map(str => str.split('"')[1]);
           })
