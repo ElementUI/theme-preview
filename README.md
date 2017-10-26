@@ -1,4 +1,9 @@
 # theme-preview
+
+This is for Element 1.x. Please check out [theme-chalk-preview](https://github.com/ElementUI/theme-chalk-preview) if you are using Element 2.x.
+
+##
+
 Preview theme transform in real-time.
 
 Visit <a href="https://elementui.github.io/theme-preview/">this page</a>.
