@@ -300,20 +300,20 @@
       },
 
       getIndexStyle() {
-        this.getFile('//unpkg.com/element-ui/lib/theme-default/index.css')
+        this.getFile('//unpkg.com/element-ui@1.4/lib/theme-default/index.css')
           .then(({ data }) => {
             this.originalStyle = this.getStyleTemplate(data);
           });
       },
 
       getSeparatedStyles() {
-        this.getFile('//unpkg.com/element-ui/lib/theme-default/')
+        this.getFile('//unpkg.com/element-ui@1.4/lib/theme-default/')
           .then(({ data }) => {
             return data.match(/href="[\w-]+\.css"/g).map(str => str.split('"')[1]);
           })
           .then(styleFiles => {
             return Promise.all(styleFiles.map(file => {
-              return this.getFile(`//unpkg.com/element-ui/lib/theme-default/${ file }`);
+              return this.getFile(`//unpkg.com/element-ui@1.4/lib/theme-default/${ file }`);
             }));
           })
           .then(files => {
@@ -328,7 +328,7 @@
 
       getFontFiles() {
         Promise.all(this.fontFiles.map(font => {
-          return this.getFile(`//unpkg.com/element-ui/lib/theme-default/fonts/${ font }`, true);
+          return this.getFile(`//unpkg.com/element-ui@1.4/lib/theme-default/fonts/${ font }`, true);
         }))
           .then(fonts => {
             this.fonts = fonts;
@@ -343,7 +343,7 @@
     },
 
     mounted() {
-      this.$nextTick(_ => {
+      this.$nextTick(() => {
         this.originalStylesheetCount = document.styleSheets.length;
       });
     }
